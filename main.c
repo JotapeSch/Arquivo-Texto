@@ -1,0 +1,192 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ARQUIVO1 "2-readme.code.txt"
+#define ARQUIVO2 "3-readme.decifra.txt"
+#define ARQUIVO3 "4-readme.nlines.txt"
+
+
+
+void AbrirArquivo(FILE **arquivo, const char *modo_abertura, const char *nome_arquivo){
+    *arquivo = fopen(nome_arquivo, modo_abertura);
+    if(*arquivo == NULL){
+        *arquivo = fopen(nome_arquivo, "w");
+        if(*arquivo == NULL){
+            printf("Erro ao abrir o arquivo!\n");
+            exit(100);
+        }
+    }
+}
+
+
+//Objetivo: Decifra o arquivo
+//parametros: nome do arquivo
+//retorno: Nenhum
+void DecifrarArquivo(const char *nome_arquivo){
+    FILE *arquivo_entrada;
+    FILE *arquivo_saida;
+    int codigo_ascii;
+
+    AbrirArquivo(&arquivo_entrada, "r", nome_arquivo);
+    if(arquivo_entrada == NULL){
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    AbrirArquivo(&arquivo_saida, "w", ARQUIVO2);
+    if(arquivo_saida == NULL){
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+    char carac;
+    while((carac = fgetc(arquivo_entrada)) != EOF){
+        if(carac == '['){
+            if(fscanf(arquivo_entrada, "%d", &codigo_ascii) == 1){
+                char caractere = (char)codigo_ascii;
+                fprintf(arquivo_saida, "%c", caractere);
+            } else {
+            printf("ERRO: Colchete sem numero valido. Parando.\n");
+            break;
+            }
+        } 
+    }
+    fclose(arquivo_entrada);
+    fclose(arquivo_saida);
+    printf("----------------------------------\n");
+    printf("Arquivo decifrado com sucesso!\n");
+}
+
+
+//Objetivo: Faz a varredura ate o final do arquivo e verifica os '\n', fazendo a contagem
+//parametros: nome do arquivo
+//retorno: quantidade de linha se der certo, senao NULL
+char *ler_linha (FILE *arquivo){
+    int tamanho_atual = 128;
+    int indice = 0;
+    char *linha = (char *)malloc(tamanho_atual);
+    int c;
+
+    if(linha == NULL){
+        printf("Erro de alocacao de memoria!\n");
+        return NULL;
+    }
+
+    while((c = fgetc(arquivo)) != EOF){
+        if(indice == tamanho_atual - 1){
+            tamanho_atual *= 2;
+
+            char *temp = (char *)realloc(linha, tamanho_atual);
+
+            if(temp == NULL){
+                printf("Erro de alocacao de memora!\n");
+                free(temp);
+                return NULL;
+            }
+            linha = temp;
+        }
+
+        linha[indice++] = (char)c;
+        if(c == '\n'){
+            break;
+        }
+    }
+    if(indice > 0){
+        linha[indice] = '\0';
+        char *final_linha = (char *)realloc(linha, indice + 1);
+        if (final_linha != NULL) {
+            linha = final_linha;
+        }
+        return linha;
+    }
+    free(linha);
+    return NULL;
+}
+
+//Objetivo: grava linha que foi lida em *ler_linha e ja faz a concatenacao de forma direta
+//parametros: nome do arquivo
+//retorno: Nenhum
+void GravaLinha (const char *nome_arquivo){
+    FILE *arquivo_entrada;
+    FILE *arquivo_saida;
+    char *linha = NULL;
+    int contador = 0;
+
+    AbrirArquivo(&arquivo_entrada, "r", nome_arquivo);
+    if(arquivo_entrada == NULL){
+        printf("Erro ao abrir o arquivo!\n");
+        return;
+    }
+
+    AbrirArquivo(&arquivo_saida, "w", ARQUIVO3);
+    if (arquivo_saida == NULL){
+        printf("Erro ao abrir o arquivo!\n");
+        return;
+    }
+
+    while((linha = ler_linha(arquivo_entrada)) != NULL){
+        fprintf(arquivo_saida, "[linha:%d]%s", contador+1, linha);
+        free(linha);
+        contador++;
+    }
+    fclose(arquivo_entrada);
+    fclose(arquivo_saida);
+    printf("----------------------------------\n");
+    printf("Numero de linha gravado em arquivo 3 com sucesso!\n");
+}
+
+
+void mostrar_menu(){
+    printf("\n");
+    printf("1-Decifra arquivo\n"); //JOTA
+    printf("2-Grava numero linha em arquivo\n"); //JOTA
+    printf("3-Quantas linhas o arquivo tem\n"); // RYAN
+    printf("4-Qual a maior linha\n");   // RYAN
+    printf("5-Pesquisar uma palavra\n"); // VINI
+    printf("0-Encerrar\n");
+}
+
+int main (){
+    int opcao;
+    do {
+        mostrar_menu();
+        printf("\n");
+        printf("Qual opcao: \n");
+        if(scanf("%d", &opcao) != 1){
+            printf("Digite uma opcao valida!\n");
+        }
+        switch (opcao)
+        {
+        case 1:
+            DecifrarArquivo(ARQUIVO1);
+            break;
+        
+        case 2:
+            GravaLinha (ARQUIVO2);
+            break;
+
+        case 3:
+            
+            break;
+
+        case 4:
+            
+            break;
+
+        case 5:
+            
+            break;
+
+        case 0:
+            
+            break;
+
+        default:
+        printf("Opcao invalida\n");
+            break;
+        }
+
+    } while (opcao != 0);
+
+
+    return 0;
+}
