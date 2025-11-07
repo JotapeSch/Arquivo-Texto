@@ -133,7 +133,61 @@ void GravaLinha (const char *nome_arquivo){
     printf("----------------------------------\n");
     printf("Numero de linha gravado em arquivo 3 com sucesso!\n");
 }
+int ContarLinhas(const char *nome_arquivo) { //Obj: Contar quantas linhas existem no arquivo
+    FILE *arquivo;
+    AbrirArquivo(&arquivo, "r", nome_arquivo); 
+    int contador = 0;
+    char c;
+    int tem_conteudo = 0;
 
+    while ((c = fgetc(arquivo)) != EOF) { // fgets le ate contar o /n
+        tem_conteudo = 1;
+        if (c == '\n')
+            contador++;
+    }
+
+    
+    if (tem_conteudo && c != '\n') // msm se o arquivo não terminar com \n, ainda conta a ultima linha
+        contador++;
+
+    fclose(arquivo);
+    printf("----------------------------------\n");
+    printf("O arquivo possui %d linha(s).\n", contador);
+    return contador;
+} //retorno: numero de linhas
+
+
+//Obj: Encontrar a maior linha  de um arquivo
+void MaiorLinha(const char *nome_arquivo){
+    FILE *arquivo;
+    AbrirArquivo(&arquivo, "r", nome_arquivo);
+
+    char *linha = NULL;
+    int maior = 0;
+    int numero_linha = 0;
+    int linha_maior = 0;
+
+    while((linha = ler_linha(arquivo)) != NULL){ 
+        numero_linha++;
+        int tamanho = strlen(linha); //FUNCAO calcula o tamanho da string
+
+        if(tamanho > maior){
+            maior = tamanho;
+            linha_maior = numero_linha;
+        }
+
+        free(linha); // libera a memoria alocada dinamicamente
+    }
+
+    fclose(arquivo);
+
+    if (linha_maior == 0)
+        printf("O arquivo esta vazio.\n");
+    else {
+        printf("----------------------------------\n");
+        printf("A maior linha e a linha %d com %d caracteres.\n", linha_maior, maior);
+    }
+}
 
 void mostrar_menu(){
     printf("\n");
@@ -164,14 +218,12 @@ int main (){
             GravaLinha (ARQUIVO2);
             break;
 
-        case 3:
-            
-            break;
-
+        ccase 3:
+    ContarLinhas(ARQUIVO2);
+    break;
         case 4:
-            
-            break;
-
+    MaiorLinha(ARQUIVO2);
+    break;
         case 5:
             
             break;
